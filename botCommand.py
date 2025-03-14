@@ -10,7 +10,7 @@ from pydub import AudioSegment
 import secretsData
 from STT import recognize_speech
 from textToSum import text_to_sum
-from getTest import getTest
+from getTest import get_test
 from txtmarkdown import txt_markdown
 from convertPDF import convert_presentation
 
@@ -103,13 +103,35 @@ async def handler_audio(message: types.Message):
     os.remove(f"{user_id}.mp3")
 
 
+@router.message(lambda message: message.video_note is not None)
+async def handler_video_note(message: types.Message):
+    user_id = str(message.from_user.id)
+    video_note = message.video_note
+
+    file = await bot.get_file(video_note.file_id)
+    file_path = file.file_path
+    await bot.download_file(file_path, f"{user_id}.mp4")
+
+    video_clip = VideoFileClip(f"{user_id}.mp4")
+    audio_clip = video_clip.audio
+    audio_clip.write_audiofile(f"{user_id}.mp3")
+
+    audio_segment = AudioSegment.from_mp3(f"{user_id}.mp3")
+    audio_segment.export(f"docs/audio/{user_id}.ogg", format="ogg")
+
+    await print_info(message, user_id)
+
+    os.remove(f"{user_id}.mp4")
+    os.remove(f"{user_id}.mp3")
+
+
 async def print_info(message: types.Message, user_id: str):
     text = recognize_speech(user_id)
     print(text == "")
     text_sum = text_to_sum(text)
     await message.answer(f"Конспект по теме:\n\n{text_sum}")
 
-    tests = getTest(text_sum)
+    tests = get_test(text_sum)
     await message.answer(f"Тесты по конспекту:\n\n{tests}")
 
     markdown = txt_markdown(text_sum)
