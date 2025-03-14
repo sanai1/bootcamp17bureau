@@ -7,8 +7,8 @@ from secretsData import YANDEX_API_KEY,YANDEX_FOLDER_ID,gpt_model
 folder_id = YANDEX_FOLDER_ID
 api_key = YANDEX_API_KEY
 
-def textToSum(user_prompt) -> str:
-    system_prompt = 'Please continue taking notes in the established format. Remember to: 1. Create concise, easy-to-understand advanced bullet-point notes. 2. Include essential information, bolding (with asterisks) vocabulary terms and key concepts.3. Remove extraneous language, focusing on critical aspects.4. Base your notes strictly on the provided passages.5. Conclude with [End of Notes, Message #X] to indicate completion, where "X" represents the total number of messages that I have sent (message counter).Your notes will help me better understand the material and prepare for the exams.'
+def text_to_sum(user_prompt) -> str:
+    system_prompt = 'Please continue taking notes in the established format. Remember to: 1. Create concise, easy-to-understand advanced bullet-point notes. 2. Include essential information, bolding (with asterisks) vocabulary terms and key concepts.3. Remove extraneous language, focusing on critical aspects.4. Base your notes strictly on the provided passages.5. Conclude with to indicate completion, where represents the total number of messages that I have sent (message counter).Your notes will help me better understand the material and prepare for the exams. Отвечай строго на русском языке!!!'
     body = {
         'modelUri': f'gpt://{folder_id}/{gpt_model}',
         'completionOptions': {'stream': False, 'temperature': 0.3, 'maxTokens': 2000},
@@ -36,7 +36,4 @@ def textToSum(user_prompt) -> str:
             break
         time.sleep(2)
 
-    data = response.json()
-    print(data)
-    answer = data['response']['alternatives'][0]['message']['text']
-    return(answer)
+    return response.json()['response']['alternatives'][0]['message']['text']
