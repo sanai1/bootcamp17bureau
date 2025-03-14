@@ -7,7 +7,7 @@ from secretsData import YANDEX_API_KEY,YANDEX_FOLDER_ID,gpt_model
 folder_id = YANDEX_FOLDER_ID
 api_key = YANDEX_API_KEY
 
-async def textToSum(user_prompt):
+def textToSum(user_prompt):
     system_prompt = 'Представь себя учтелем и сделай конспект из предоставленного текста'
     body = {
         'modelUri': f'gpt://{folder_id}/{gpt_model}',
