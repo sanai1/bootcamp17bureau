@@ -37,5 +37,6 @@ def textToSum(user_prompt) -> str:
         time.sleep(2)
 
     data = response.json()
+    print(data)
     answer = data['response']['alternatives'][0]['message']['text']
     return(answer)

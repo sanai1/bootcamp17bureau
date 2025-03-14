@@ -10,14 +10,16 @@ import secretsData
 from STT import recognize_speech
 from textToSum import textToSum
 from getTest import getTest
+from txtmarkdown import txtmarkdown
+from convertPDF import convert_presentation
 
 router = Router()
 bot = Bot(token=secretsData.token_bot)
 router.message.middleware(ChatActionMiddleware())
 
 type_voice = "Голосовое сообщение"
-type_audio = "Аудио лекции"
-type_video = "Видео лекции"
+type_audio = "Аудио лекции (в разработке)"
+type_video = "Видео лекции (в разработке)"
 
 @router.message(CommandStart())
 async def start(message: Message):
@@ -38,12 +40,14 @@ async def voice(message: Message):
 
 @router.message(F.text == type_audio)
 async def audio(message: Message):
-    await message.answer("Пришлите аудио-файл с лекцией")
+    print()
+    # await message.answer("Пришлите аудио-файл с лекцией")
 
 
 @router.message(F.text == type_video)
 async def video(message: Message):
-    await message.answer("Пришлите видео-файл с лекцией")
+    print()
+    # await message.answer("Пришлите видео-файл с лекцией")
 
 
 @router.message(lambda message: message.video is not None)
@@ -80,11 +84,17 @@ async def handler_voice(message: types.Message):
     await bot.download_file(file_path, f"docs/audio/{user_id}.ogg")
 
     text = recognize_speech(user_id)
+    print(text == "")
     text_sum = textToSum(text)
+    await message.answer(f"Конспект по теме:\n\n{text_sum}")
     test = getTest(text)
+    await message.answer(f"Тесты по конспекту:\n\n{test}")
+    markdown = txtmarkdown(text)
+    await message.answer(f"Формат markdown для создания презентации:\n\n{markdown}")
+    # f = open(f"docs/presentation/{user_id}.txt", "w")
+    # f.write(markdown)
+    # convert_presentation(f"docs/presentation/{user_id}.txt", output_format="pdf")
 
-    await message.answer(text_sum)
-    await message.answer(test)
 
 
 @router.message(lambda message: message.audio is not None)
