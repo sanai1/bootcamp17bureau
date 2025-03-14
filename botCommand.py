@@ -5,10 +5,11 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 from aiogram.utils.chat_action import ChatActionMiddleware
 from moviepy import VideoFileClip
-from pydub import AudioSegment
 
 import secretsData
 from STT import recognize_speech
+from textToSum import textToSum
+from getTest import getTest
 
 router = Router()
 bot = Bot(token=secretsData.token_bot)
@@ -64,7 +65,6 @@ async def handler_video(message: types.Message):
 
     await message.answer_audio(ogg_audio_file)
 
-    import os
     os.remove(f"{user_id}_video.mp4")
     os.remove(f"{user_id}.ogg")
 
@@ -80,11 +80,16 @@ async def handler_voice(message: types.Message):
     await bot.download_file(file_path, f"docs/audio/{user_id}.ogg")
 
     text = recognize_speech(user_id)
-    await message.answer(text)
+    text_sum = textToSum(text)
+    test = getTest(text)
+
+    await message.answer(text_sum)
+    await message.answer(test)
 
 
 @router.message(lambda message: message.audio is not None)
 async def handler_audio(message: types.Message):
+    user_id = str(message.from_user.id)
     audio_ = message.audio
     file_id = audio_.file_id
 
