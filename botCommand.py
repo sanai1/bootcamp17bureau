@@ -79,9 +79,8 @@ async def handler_voice(message: types.Message):
     user_id = str(message.from_user.id)
     await bot.download_file(file_path, f"docs/audio/{user_id}.ogg")
 
-    text = await recognize_speech(user_id)
+    text = recognize_speech(user_id)
     await message.answer(text)
-    # os.remove("voice.ogg")
 
 
 @router.message(lambda message: message.audio is not None)

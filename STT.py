@@ -3,7 +3,7 @@ import requests
 from secretsData import stt_token_bot, YANDEX_FOLDER_ID
 
 def recognize_speech(file_name, lang='ru-RU'):
-    url = f"https://stt.api.cloud.yandex.net/speech/v1/stt:recognize?folderId={folder_id}&lang={lang}"
+    url = f"https://stt.api.cloud.yandex.net/speech/v1/stt:recognize?folderId={YANDEX_FOLDER_ID}&lang={lang}"
     headers = {
         "Authorization": f"Api-Key {stt_token_bot}"
     }
