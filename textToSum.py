@@ -8,7 +8,7 @@ folder_id = YANDEX_FOLDER_ID
 api_key = YANDEX_API_KEY
 
 def text_to_sum(user_prompt) -> str:
-    system_prompt = 'Please continue taking notes in the established format. Remember to: 1. Create concise, easy-to-understand advanced bullet-point notes. 2. Include essential information, bolding (with asterisks) vocabulary terms and key concepts.3. Remove extraneous language, focusing on critical aspects.4. Base your notes strictly on the provided passages.5. Conclude with to indicate completion, where represents the total number of messages that I have sent (message counter).Your notes will help me better understand the material and prepare for the exams. Отвечай строго на русском языке!!!'
+    system_prompt = 'Тебе даны идеи того, что следует рассказать на лекции. Тебе нужно составить план (по пунктам), по которому преподаватель будет рассказывать лекцию. Учти, что рассказывать следует так, что бы было понятно студенту, не обязательно говорить в той последовательности, в которой идет запрос, если не указано иное. Указывай моменты, которые следует учесть при рассказе лекции.'
     body = {
         'modelUri': f'gpt://{folder_id}/{gpt_model}',
         'completionOptions': {'stream': False, 'temperature': 0.3, 'maxTokens': 2000},
