@@ -9,7 +9,7 @@ def recognize_speech(file_name, lang='ru-RU'):
         "Authorization": f"Api-Key {stt_token_bot}"
     }
 
-    with open('docs/audio' + file_name + '.odd', "rb") as audio_file:
+    with open('docs/audio/' + file_name + '.ogg', "rb") as audio_file:
         response = requests.post(url, headers=headers, data=audio_file)
 
     if response.status_code == 200:
