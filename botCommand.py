@@ -5,6 +5,7 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 from aiogram.utils.chat_action import ChatActionMiddleware
 from moviepy import VideoFileClip
+from pydub import AudioSegment
 
 import secretsData
 
@@ -45,22 +46,26 @@ async def video(message: Message):
 
 @router.message(lambda message: message.video is not None)
 async def handler_video(message: types.Message):
+    user_id = message.from_user.id
     video_ = message.video
     file_id = video_.file_id
 
     file = await bot.get_file(file_id)
     file_path = file.file_path
-    await bot.download_file(file_path, "video.mp4")
+    await bot.download_file(file_path, f"{user_id}_video.mp4")
 
-    video_clip = VideoFileClip("video.mp4")
+    video_clip = VideoFileClip(f"{user_id}_video.mp4")
     audio_clip = video_clip.audio
-    audio_clip.write_audiofile("audio.mp3")
 
-    audio_file = FSInputFile("audio.mp3")
-    await message.reply_audio(audio_file)
+    audio_clip.write_audiofile(f"{user_id}.ogg", codec='libvorbis')
 
-    os.remove("video.mp4")
-    os.remove("audio.mp3")
+    ogg_audio_file = FSInputFile(f"{user_id}.ogg")
+
+    await message.answer_audio(ogg_audio_file)
+
+    import os
+    os.remove(f"{user_id}_video.mp4")
+    os.remove(f"{user_id}.ogg")
 
 
 @router.message(lambda message: message.voice is not None)
