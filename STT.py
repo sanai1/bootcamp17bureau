@@ -2,13 +2,14 @@ import requests
 
 from secretsData import stt_token_bot, YANDEX_FOLDER_ID
 
-async def recognize_speech(audio_file, lang='ru-RU'):
-    url = f"https://stt.api.cloud.yandex.net/speech/v1/stt:recognize?folderId={YANDEX_FOLDER_ID}&lang={lang}"
+def recognize_speech(file_name, lang='ru-RU'):
+    url = f"https://stt.api.cloud.yandex.net/speech/v1/stt:recognize?folderId={folder_id}&lang={lang}"
     headers = {
         "Authorization": f"Api-Key {stt_token_bot}"
     }
 
-    response = requests.post(url, headers=headers, data=audio_file)
+    with open('docs/audio/' + file_name + '.ogg', "rb") as audio_file:
+        response = requests.post(url, headers=headers, data=audio_file)
 
     if response.status_code == 200:
         return response.json().get("result", "Ошибка: не удалось распознать речь")
