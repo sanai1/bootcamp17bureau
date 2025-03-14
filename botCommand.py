@@ -7,6 +7,7 @@ from aiogram.utils.chat_action import ChatActionMiddleware
 from moviepy import VideoFileClip
 
 import secretsData
+from STT import recognize_speech
 
 router = Router()
 bot = Bot(token=secretsData.token_bot)
@@ -70,15 +71,12 @@ async def handler_voice(message: types.Message):
 
     file = await bot.get_file(file_id)
     file_path = file.file_path
-    await bot.download_file(file_path, "voice.ogg")
+    user_id = str(message.from_user.id)
+    await bot.download_file(file_path, f"docs/audio/{user_id}.ogg")
 
-    # audio = AudioSegment.from_file("voice.ogg", format="ogg")
-    # audio.export("voice.mp3", format="mp3")
-
-    audio_file = FSInputFile("voice.ogg")
-    await message.reply_audio(audio_file)
-
-    os.remove("voice.ogg")
+    text = await recognize_speech(user_id)
+    await message.answer(text)
+    # os.remove("voice.ogg")
 
 
 @router.message(lambda message: message.audio is not None)
