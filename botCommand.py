@@ -21,13 +21,14 @@ router.message.middleware(ChatActionMiddleware())
 type_voice = "Голосовое сообщение"
 type_audio = "Аудио лекции"
 type_video = "Видео лекции"
+type_video_note = "Кружочек с лекции"
 
 @router.message(CommandStart())
 async def start(message: Message):
     keyboard = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text=type_voice)],
-        [KeyboardButton(text=type_audio)],
-        [KeyboardButton(text=type_video)]],
+        [KeyboardButton(text=type_voice), KeyboardButton(text=type_audio)],
+        [KeyboardButton(text=type_video),KeyboardButton(text=type_video_note)]
+    ],
         resize_keyboard = True,
         input_field_placeholder = "Выберите вариант данных?"
     )
@@ -47,6 +48,11 @@ async def audio(message: Message):
 @router.message(F.text == type_video)
 async def video(message: Message):
     await message.answer("Пришлите видео-файл с лекцией")
+
+
+@router.message(F.text == type_video_note)
+async def video_note(message: Message):
+    await message.answer("Пришлите кружочек с лекцией")
 
 
 @router.message(lambda message: message.video is not None)
@@ -106,9 +112,9 @@ async def handler_audio(message: types.Message):
 @router.message(lambda message: message.video_note is not None)
 async def handler_video_note(message: types.Message):
     user_id = str(message.from_user.id)
-    video_note = message.video_note
+    video_note_ = message.video_note
 
-    file = await bot.get_file(video_note.file_id)
+    file = await bot.get_file(video_note_.file_id)
     file_path = file.file_path
     await bot.download_file(file_path, f"{user_id}.mp4")
 
