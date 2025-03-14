@@ -7,7 +7,7 @@ from secretsData import YANDEX_API_KEY,YANDEX_FOLDER_ID,gpt_model
 folder_id = YANDEX_FOLDER_ID
 api_key = YANDEX_API_KEY
 
-async def getTest(user_prompt):
+def getTest(user_prompt):
     system_prompt = 'Тебе дается текст лекции. Сделай тест с выбором ответа на основе текста лекции. Сделай 5 вопросов. Для каждого вопроса должно быть 4 варианта ответа и только один верный. Пометь правильный ответ на вопрос с помощью символа звездочки. НЕ ГОВОРИ НИЧЕГО КРОМЕ ЭТОГО'
     body = {
         'modelUri': f'gpt://{folder_id}/{gpt_model}',
