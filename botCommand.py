@@ -21,7 +21,7 @@ bot = Bot(token=secretsData.token_bot)
 router.message.middleware(ChatActionMiddleware())
 
 type_your = "На основе моих идей / записей"
-type_books = "Наши материалы"
+type_books = "Официальные учебники"
 
 @router.message(CommandStart())
 async def start(message: Message):
@@ -31,18 +31,18 @@ async def start(message: Message):
         resize_keyboard = True,
         input_field_placeholder = "Выберите, на основе чего вы хотите получить базу для вашей лекции:"
     )
-    await message.answer("Добро пожаловать\n\nЯ - помощник в создании плана для лекции, помогу вам составить:\n- План лекции по пунктам\n- тесты по данной теме\n- Презентацию для лекции по данной теме\n\nДля основы для формирования плана лекции ты можешь использовать:\n- Голосовое сообщение\n- Аудио-файл (формат mp3)\n- Запись вашей/чужой лекции, структуру которой вы хотите повторить\n- Использовать официальные учебники по предмету", reply_markup=keyboard)
+    await message.answer("Добро пожаловать\n\nЯ - помощник в создании плана для лекции, помогу вам составить:\n> План лекции по пунктам\n> тесты по данной теме\n> Презентацию для лекции по данной теме\n\nДля основы для формирования плана лекции ты можешь использовать:\n> Голосовое сообщение\n> Аудио-файл (формат mp3)\n> Запись вашей/чужой лекции, структуру которой вы хотите повторить\n> Использовать официальные учебники по предмету", reply_markup=keyboard)
 
 
 @router.message(F.text == type_your)
 async def classic(message: Message):
-    await message.answer("Вы можете прислать для обратки:\n- Голосовые сообщения\n- Телеграм-кружочек\n- Аудио файл\n- Видео файл\n- рdf-файл по теме / учебник", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Вы можете прислать для обратки:\n> Голосовые сообщения\n> Телеграм-кружочек\n> Аудио файл\n> Видео файл\n> рdf-файл по теме / учебник", reply_markup=ReplyKeyboardRemove())
 
 
 @router.message(F.text == type_books)
 async def books(message: Message):
     keyboard = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text="Биология"), KeyboardButton(text="Иные предметы (в скором времени)")]
+        [KeyboardButton(text="Биология")],[KeyboardButton(text="Другие предметы (в скором времени)")]
     ],
         resize_keyboard = True
     )
@@ -58,7 +58,7 @@ async def biology(message: Message):
     )
     await message.answer("Выберите параграф", reply_markup=keyboard)
 
-@router.message(F.text == "Иные предметы (в скором времени)")
+@router.message(F.text == "Другие предметы (в скором времени)")
 async def biology(message: Message):
     await message.answer("Тут пока что пусто, загляните в другие вкладки, там много интересного!", reply_markup=ReplyKeyboardRemove())
 
