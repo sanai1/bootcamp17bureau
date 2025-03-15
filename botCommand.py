@@ -19,16 +19,13 @@ router = Router()
 bot = Bot(token=secretsData.token_bot)
 router.message.middleware(ChatActionMiddleware())
 
-type_voice = "Голосовое сообщение"
-type_audio = "Аудио лекции"
-type_video = "Видео лекции"
-type_video_note = "Кружочек с лекции"
+type_classic = "Свои материалы"
+type_books = "Наши материалы"
 
 @router.message(CommandStart())
 async def start(message: Message):
     keyboard = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text=type_voice), KeyboardButton(text=type_audio)],
-        [KeyboardButton(text=type_video),KeyboardButton(text=type_video_note)]
+        [KeyboardButton(text=type_classic), KeyboardButton(text=type_books)]
     ],
         resize_keyboard = True,
         input_field_placeholder = "Выберите вариант данных?"
@@ -36,24 +33,44 @@ async def start(message: Message):
     await message.answer("Добро пожаловать", reply_markup=keyboard)
 
 
-@router.message(F.text == type_voice)
-async def voice(message: Message):
-    await message.answer("Запишите голосовое сообщение с описанием лекции, которую хотите провезти")
+@router.message(F.text == type_classic)
+async def classic(message: Message):
+    await message.answer("Вы можете прислать следующие варианты:\n-Голосовые сообщения\n-Кружочек\n-Аудио файл\n-Видео файл")
 
 
-@router.message(F.text == type_audio)
-async def audio(message: Message):
-    await message.answer("Пришлите аудио-файл с лекцией")
+@router.message(F.text == type_books)
+async def books(message: Message):
+    keyboard = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="Биология"), KeyboardButton(text="Иные предметы (в скором времени)")]
+    ],
+        resize_keyboard = True
+    )
+    await message.answer("Выберите предмет", reply_markup=keyboard)
 
 
-@router.message(F.text == type_video)
-async def video(message: Message):
-    await message.answer("Пришлите видео-файл с лекцией")
+@router.message(F.text == "Биология")
+async def biology(message: Message):
+    keyboard = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="1 параграф"), KeyboardButton(text="2 параграф")]
+    ],
+        resize_keyboard=True
+    )
+    await message.answer("Выберите параграф", reply_markup=keyboard)
 
 
-@router.message(F.text == type_video_note)
-async def video_note(message: Message):
-    await message.answer("Пришлите кружочек с лекцией")
+@router.message(F.text == "1 параграф" or F.text == "2 параграф")
+async def paragraph(message: Message):
+    user_id = str(message.from_user.id)
+    if str(message.text) == "1 параграф":
+        with open("docs/books/biology/paragraph_one.txt", "rd") as file:
+            result = file.read()
+            task = asyncio.create_task(print_info(message, user_id, result, True))
+            await task
+    elif str(message.text) == "2 параграф":
+        with open("docs/books/biology/paragraph_two.txt", "rd") as file:
+            result = file.read()
+            task = asyncio.create_task(print_info(message, user_id, result, True))
+            await task
 
 
 @router.message(lambda message: message.video is not None)
@@ -73,7 +90,7 @@ async def handler_video(message: types.Message):
     audio_segment = AudioSegment.from_mp3(f"{user_id}_{file_id}.mp3")
     audio_segment.export(f"docs/audio/{user_id}_{file_id}.ogg", format="ogg")
 
-    task = asyncio.create_task(print_info(message, user_id, file_id))
+    task = asyncio.create_task(print_info(message, user_id, file_id, False))
 
     await task
 
@@ -81,7 +98,7 @@ async def handler_video(message: types.Message):
     os.remove(f"{user_id}_{file_id}.mp3")
 
 
-@router.message(lambda message: message.voice is not None)
+@router.message(lambda message: message.classic is not None)
 async def handler_voice(message: types.Message):
     voice_ = message.voice
     file_id = voice_.file_id
@@ -93,7 +110,7 @@ async def handler_voice(message: types.Message):
     file_name = f"docs/audio/{user_id}_{file_id}.ogg"
     await bot.download_file(file_path, file_name)
 
-    task = asyncio.create_task(print_info(message, user_id, file_id))
+    task = asyncio.create_task(print_info(message, user_id, file_id, False))
 
     await task
 
@@ -111,7 +128,7 @@ async def handler_audio(message: types.Message):
     audio_segment = AudioSegment.from_mp3(f"{user_id}_{file_id}.mp3")
     audio_segment.export(f"docs/audio/{user_id}_{file_id}.ogg", format="ogg")
 
-    task = asyncio.create_task(print_info(message, user_id, file_id))
+    task = asyncio.create_task(print_info(message, user_id, file_id, False))
 
     await task
 
@@ -135,7 +152,7 @@ async def handler_video_note(message: types.Message):
     audio_segment = AudioSegment.from_mp3(f"{user_id}_{file_id}.mp3")
     audio_segment.export(f"docs/audio/{user_id}_{file_id}.ogg", format="ogg")
 
-    task = asyncio.create_task(print_info(message, user_id, file_id))
+    task = asyncio.create_task(print_info(message, user_id, file_id, False))
 
     await task
 
@@ -143,7 +160,7 @@ async def handler_video_note(message: types.Message):
     os.remove(f"{user_id}_{file_id}.mp3")
 
 
-async def print_info(message: types.Message, user_id: str, file_id: str):
+async def print_info(message: types.Message, user_id: str, file_id: str, book: bool):
     try:
         text = await recognize_speech(f"{user_id}_{file_id}")
         if not text:
