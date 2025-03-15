@@ -62,22 +62,26 @@ async def biology(message: Message):
     await message.answer("Тут пока что пусто.", reply_markup=ReplyKeyboardRemove())
 
 
-@router.message(F.text == "1 параграф" or F.text == "2 параграф")
-async def paragraph(message: Message):
+@router.message(F.text == "1 параграф")
+async def paragraph_one(message: Message):
     wait = await message.answer('Загружаю параграф...', reply_markup=ReplyKeyboardRemove())
     user_id = str(message.from_user.id)
-    if str(message.text) == "1 параграф":
-        with open("docs/books/biology/paragraph_one.txt", "r") as file:
-            result = file.read()
-            await wait.delete()
-            task = asyncio.create_task(print_info(message, user_id, result, True))
-            await task
-    elif str(message.text) == "2 параграф":
-        with open("docs/books/biology/paragraph_two.txt", "r") as file:
-            result = file.read()
-            await wait.delete()
-            task = asyncio.create_task(print_info(message, user_id, result, True))
-            await task
+    with open("docs/books/biology/paragraph_one.txt", "r") as file:
+        result = file.read()
+        await wait.delete()
+        task = asyncio.create_task(print_info(message, user_id, result, True))
+        await task
+
+
+@router.message(F.text == "2 параграф")
+async def paragraph_two(message: Message):
+    wait = await message.answer('Загружаю параграф...', reply_markup=ReplyKeyboardRemove())
+    user_id = str(message.from_user.id)
+    with open("docs/books/biology/paragraph_two.txt", "r") as file:
+        result = file.read()
+        await wait.delete()
+        task = asyncio.create_task(print_info(message, user_id, result, True))
+        await task
 
 
 @router.message(lambda message: message.video is not None)
