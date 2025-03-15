@@ -10,7 +10,8 @@ api_key = YANDEX_API_KEY
 
 
 async def txt_markdown(user_prompt: str) -> str:
-    system_prompt = "Создай markdown для pandoc презентации на основе текста. Для заголовка используй # после, которой должно идти название слайда. Для перечисления используй '-' перед пунктами списка. Запиши только основные моменты в эту презентацию. Длина презентации составляет 5 слайдов. Не пронумеровывай слайды. После символа # должно идти название слайда, не его номер. ОТВЕЧАЙ СТРОГО НА АНГЛИЙСКОМ! НЕ НУМЕРУЙ СЛАЙДЫ! ЗРИТЕЛЬ НЕ ДОЛЖЕН ЗНАТЬ КАКОЙ НОМЕР У СЛАЙДА! НЕ НУЖНО ЕМУ ЕГО СООБЩАТЬ!"
+    # system_prompt = "Напиши ответ СТРОГО НА АНГЛИЙСКОМ!!! Создай markdown для pandoc презентации на основе текста. Для заголовка используй # после, которой должно идти название слайда. Для перечисления используй '-' перед пунктами списка. Запиши только основные моменты в эту презентацию. Длина презентации составляет 5 слайдов. Не пронумеровывай слайды. После символа # должно идти название слайда, не его номер. ОТВЕЧАЙ СТРОГО НА АНГЛИЙСКОМ! НЕ НУМЕРУЙ СЛАЙДЫ! ЗРИТЕЛЬ НЕ ДОЛЖЕН ЗНАТЬ КАКОЙ НОМЕР У СЛАЙДА! НЕ НУЖНО ЕМУ ЕГО СООБЩАТЬ! Переведи результат на английский язык"
+    system_prompt = "Write the answer STRICTLY IN ENGLISH!!! Create markdown for pandoc text-based presentations. For the title, use the # after which the slide name should go. To list, use the '-' before the list items. Write down only the main points in this presentation. The presentation is 5 slides long. Don't number the slides. The # symbol should be followed by the slide name, not its number. ANSWER STRICTLY IN ENGLISH! ONLY IN ENGLISH LANGUAGE! DO NOT USE RUSSIAN. TRANSLATE ON ENGLISH!!!"
     body = {
         'modelUri': f'gpt://{folder_id}/{gpt_model}',
         'completionOptions': {'stream': False, 'temperature': 0.3, 'maxTokens': 2000},
