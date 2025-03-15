@@ -54,6 +54,7 @@ async def start(message: Message, state: FSMContext) -> None:
 async def language(callback: CallbackQuery, state: FSMContext) -> None:
     await state.update_data(language=callback.data)
     await callback.message.answer(f"Select {callback.data} language")
+    await callback.answer(f"Select {callback.data} language")
 
 
 @router.message(F.text == type_your)
