@@ -1,8 +1,9 @@
 import os
+import subprocess
 
 from aiogram import F, Router, types, Bot
 from aiogram.filters import CommandStart
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile, InputFile
 from aiogram.utils.chat_action import ChatActionMiddleware
 from moviepy import VideoFileClip
 from pydub import AudioSegment
@@ -141,12 +142,17 @@ async def print_info(message: types.Message, user_id: str):
     await message.answer(f"Тесты по конспекту:\n\n{tests}")
 
     markdown = txt_markdown(text_sum)
-    await message.answer(f"Формат markdown для создания презентации:\nСервисы для конвертации MD в PFD\nhttps://apitemplate.io/pdf-tools/convert-markdown-to-pdf/\n\nhttps://www.markdowntopdf.com/")
-    await message.answer(markdown)
 
-
-
-
+    input_md = f"docs/markdown/{user_id}.txt"
+    output_pdf = f"docs/presentation/{user_id}.pdf"
+    command = ["pandoc", "-t", "beamer", input_md, "-o", output_pdf]
+    try:
+        subprocess.run(command, check=True)
+        pdf_file = FSInputFile(output_pdf)
+        await message.reply_document(pdf_file)
+    except subprocess.CalledProcessError as e:
+        await message.answer(f"Формат markdown для создания презентации:\nСервисы для конвертации MD в PFD\nhttps://apitemplate.io/pdf-tools/convert-markdown-to-pdf/\n\nhttps://www.markdowntopdf.com/")
+        await message.answer(markdown)
 
 
 
