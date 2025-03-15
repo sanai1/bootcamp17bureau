@@ -14,7 +14,6 @@ from STT import recognize_speech
 from textToSum import text_to_sum
 from getTest import get_test
 from txtmarkdown import txt_markdown
-from convertPDF import convert_presentation
 
 router = Router()
 bot = Bot(token=secretsData.token_bot)
@@ -74,7 +73,7 @@ async def handler_video(message: types.Message):
     audio_segment = AudioSegment.from_mp3(f"{user_id}.mp3")
     audio_segment.export(f"docs/audio/{user_id}.ogg", format="ogg")
 
-    await print_info(message, user_id)
+    await print_info(message, user_id, file_id)
 
     os.remove(f"{user_id}.mp4")
     os.remove(f"{user_id}.mp3")
@@ -97,32 +96,29 @@ async def handler_voice(message: types.Message):
     await task
 
 
-async def print_info(message: types.Message, user_id: str, file_id: str):
-    try:
-        # Распознаем речь
-        text = await recognize_speech(f"{user_id}_{file_id}")
-        if not text:
-            await message.answer("Не удалось распознать речь.")
-            return
+@router.message(lambda message: message.audio is not None)
+async def handler_audio(message: types.Message):
+    user_id = str(message.from_user.id)
+    audio_ = message.audio
+    file_id = audio_.file_id
 
-        # Получаем конспект
-        text_sum = await text_to_sum(text)
-        await message.answer(f"Конспект по теме:\n\n{text_sum}")
-        test = await get_test(text)
-        await message.answer(f"Тест по теме:\n\n{test}")
-        markdown = await txt_markdown(text)
-        await message.answer(f"markdown:\n\n{markdown}")
+    file = await bot.get_file(file_id)
+    file_path = file.file_path
+    await bot.download_file(file_path, f"{user_id}.mp3")
 
-    except Exception as e:
-        await message.answer(f"Ошибка обработки: {str(e)}")
+    audio_segment = AudioSegment.from_mp3(f"{user_id}.mp3")
+    audio_segment.export(f"docs/audio/{user_id}.ogg", format="ogg")
+
+    await print_info(message, user_id, file_id)
 
 
 @router.message(lambda message: message.video_note is not None)
 async def handler_video_note(message: types.Message):
     user_id = str(message.from_user.id)
     video_note_ = message.video_note
+    file_id = video_note_.file_id
 
-    file = await bot.get_file(video_note_.file_id)
+    file = await bot.get_file(file_id)
     file_path = file.file_path
     await bot.download_file(file_path, f"{user_id}.mp4")
 
@@ -133,34 +129,40 @@ async def handler_video_note(message: types.Message):
     audio_segment = AudioSegment.from_mp3(f"{user_id}.mp3")
     audio_segment.export(f"docs/audio/{user_id}.ogg", format="ogg")
 
-    await print_info(message, user_id)
+    await print_info(message, user_id, file_id)
 
     os.remove(f"{user_id}.mp4")
     os.remove(f"{user_id}.mp3")
 
 
-async def print_info(message: types.Message, user_id: str):
-    text = recognize_speech(user_id)
-    print(text == "")
-    text_sum = text_to_sum(text)
-    await message.answer(f"Конспект по теме:\n\n{text_sum}")
-
-    tests = get_test(text_sum)
-    await message.answer(f"Тесты по конспекту:\n\n{tests}")
-
-    markdown = txt_markdown(text_sum)
-
-    input_md = f"docs/markdown/{user_id}.txt"
-    output_pdf = f"docs/presentation/{user_id}.pdf"
-    command = ["pandoc", "-t", "beamer", input_md, "-o", output_pdf]
+async def print_info(message: types.Message, user_id: str, file_id: str):
     try:
-        subprocess.run(command, check=True)
-        pdf_file = FSInputFile(output_pdf)
-        await message.reply_document(pdf_file)
-    except subprocess.CalledProcessError as e:
-        await message.answer(f"Формат markdown для создания презентации:\nСервисы для конвертации MD в PFD\nhttps://apitemplate.io/pdf-tools/convert-markdown-to-pdf/\n\nhttps://www.markdowntopdf.com/")
-        await message.answer(markdown)
+        text = await recognize_speech(f"{user_id}_{file_id}")
+        if not text:
+            await message.answer("Не удалось распознать речь.")
+            return
 
+        text_sum = await text_to_sum(text)
+        await message.answer(f"Конспект по теме:\n\n{text_sum}")
+
+        test = await get_test(text)
+        await message.answer(f"Тест по теме:\n\n{test}")
+
+        markdown = await txt_markdown(text)
+
+        input_md = f"docs/markdown/{user_id}.txt"
+        output_pdf = f"docs/presentation/{user_id}.pdf"
+        command = ["pandoc", "-t", "beamer", input_md, "-o", output_pdf]
+        try:
+            subprocess.run(command, check=True)
+            pdf_file = FSInputFile(output_pdf)
+            await message.reply_document(pdf_file)
+        except subprocess.CalledProcessError as e:
+            await message.answer(
+                f"Формат markdown для создания презентации:\nСервисы для конвертации MD в PFD\nhttps://apitemplate.io/pdf-tools/convert-markdown-to-pdf/\n\nhttps://www.markdowntopdf.com/")
+            await message.answer(markdown)
+    except Exception as e:
+        await message.answer(f"Ошибка обработки: {str(e)}")
 
 
 
