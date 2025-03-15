@@ -64,19 +64,19 @@ async def handler_video(message: types.Message):
 
     file = await bot.get_file(file_id)
     file_path = file.file_path
-    await bot.download_file(file_path, f"{user_id}.mp4")
+    await bot.download_file(file_path, f"{user_id}_{file_id}.mp4")
 
-    video_clip = VideoFileClip(f"{user_id}.mp4")
+    video_clip = VideoFileClip(f"{user_id}_{file_id}.mp4")
     audio_clip = video_clip.audio
-    audio_clip.write_audiofile(f"{user_id}.mp3")
+    audio_clip.write_audiofile(f"{user_id}_{file_id}.mp3")
 
-    audio_segment = AudioSegment.from_mp3(f"{user_id}.mp3")
-    audio_segment.export(f"docs/audio/{user_id}.ogg", format="ogg")
+    audio_segment = AudioSegment.from_mp3(f"{user_id}_{file_id}.mp3")
+    audio_segment.export(f"docs/audio/{user_id}_{file_id}.ogg", format="ogg")
 
     await print_info(message, user_id, file_id)
 
-    os.remove(f"{user_id}.mp4")
-    os.remove(f"{user_id}.mp3")
+    os.remove(f"{user_id}_{file_id}.mp4")
+    os.remove(f"{user_id}_{file_id}.mp3")
 
 
 @router.message(lambda message: message.voice is not None)
@@ -104,12 +104,14 @@ async def handler_audio(message: types.Message):
 
     file = await bot.get_file(file_id)
     file_path = file.file_path
-    await bot.download_file(file_path, f"{user_id}.mp3")
+    await bot.download_file(file_path, f"{user_id}_{file_id}.mp3")
 
-    audio_segment = AudioSegment.from_mp3(f"{user_id}.mp3")
-    audio_segment.export(f"docs/audio/{user_id}.ogg", format="ogg")
+    audio_segment = AudioSegment.from_mp3(f"{user_id}_{file_id}.mp3")
+    audio_segment.export(f"docs/audio/{user_id}_{file_id}.ogg", format="ogg")
 
     await print_info(message, user_id, file_id)
+
+    os.remove(f"{user_id}_{file_id}.mp3")
 
 
 @router.message(lambda message: message.video_note is not None)
@@ -120,19 +122,19 @@ async def handler_video_note(message: types.Message):
 
     file = await bot.get_file(file_id)
     file_path = file.file_path
-    await bot.download_file(file_path, f"{user_id}.mp4")
+    await bot.download_file(file_path, f"{user_id}_{file_id}.mp4")
 
-    video_clip = VideoFileClip(f"{user_id}.mp4")
+    video_clip = VideoFileClip(f"{user_id}_{file_id}.mp4")
     audio_clip = video_clip.audio
-    audio_clip.write_audiofile(f"{user_id}.mp3")
+    audio_clip.write_audiofile(f"{user_id}_{file_id}.mp3")
 
-    audio_segment = AudioSegment.from_mp3(f"{user_id}.mp3")
-    audio_segment.export(f"docs/audio/{user_id}.ogg", format="ogg")
+    audio_segment = AudioSegment.from_mp3(f"{user_id}_{file_id}.mp3")
+    audio_segment.export(f"docs/audio/{user_id}_{file_id}.ogg", format="ogg")
 
     await print_info(message, user_id, file_id)
 
-    os.remove(f"{user_id}.mp4")
-    os.remove(f"{user_id}.mp3")
+    os.remove(f"{user_id}_{file_id}.mp4")
+    os.remove(f"{user_id}_{file_id}.mp3")
 
 
 async def print_info(message: types.Message, user_id: str, file_id: str):
@@ -149,11 +151,16 @@ async def print_info(message: types.Message, user_id: str, file_id: str):
         await message.answer(f"Тест по теме:\n\n{test}")
 
         markdown = await txt_markdown(text)
+        markdown = test_global
+        save_path_markdown = os.path.join("docs/markdown", f"{user_id}_{file_id}.txt")
 
-        input_md = f"docs/markdown/{user_id}.txt"
-        output_pdf = f"docs/presentation/{user_id}.pdf"
+        input_md = f"docs/markdown/{user_id}_{file_id}.txt"
+        output_pdf = f"docs/presentation/{user_id}_{file_id}.pdf"
         command = ["pandoc", "-t", "beamer", input_md, "-o", output_pdf]
         try:
+            with open(save_path_markdown, "w") as file:
+                file.write(markdown)
+
             subprocess.run(command, check=True)
             pdf_file = FSInputFile(output_pdf)
             await message.reply_document(pdf_file)
@@ -165,7 +172,42 @@ async def print_info(message: types.Message, user_id: str, file_id: str):
         await message.answer(f"Ошибка обработки: {str(e)}")
 
 
+test_global = """# What's AI?
 
+- Artificial Intelligence- The ability of machine to think and behave like humans.
+- How does the machine learn on its own? - That is called Machine Learning. ML is the study of computer algorithms that improve automatically with experience.
+- Just like humans learn with experience - Machines also learn with experience!
+- Examples of common AI? Alexa, Siri, Google Home, Self Driving Cars, Robots etc.
+
+# How do computers make decisions?
+
+- Conditional statements are used to perform different actions based on different conditions.
+- In many programming languages, decisions (also called conditionals) take the form of an if-then construct. They start with a condition, which is then evaluated as either True or False.
+
+What we learned. - Bot.send() method - if else statements.
+
+# Benefits of AI Playground
+
+- Streamlines a lot of back end operations, so that the you can just learn what AI is — and can get immediate results!
+- User friendly!
+- Designed to suit students needs.
+- Students can see and publish new projects and thus learn from each other.
+
+## How does learning AI help?
+
+- Logical reasoning and Sequencing 
+- Critical thinking
+- Problem solving
+- Mental Mathematics
+    - The above skills are implicit skills that students learn along with AI. And this helps them in academics, life, etc.
+
+# Extra 
+
+The well known Pythagorean theorem $x^2 + y^2 = z^2$ was  proved to be invalid for other exponents. 
+Meaning the next equation has no integer solutions:
+$$x^n + y^n = z^n$$
+
+Can AI, help find near misses for this equation?"""
 
 
 
