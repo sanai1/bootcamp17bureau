@@ -4,7 +4,7 @@ import subprocess
 
 from aiogram import F, Router, types, Bot
 from aiogram.filters import CommandStart
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile, InputFile
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile, InputFile, ReplyKeyboardRemove
 from aiogram.utils.chat_action import ChatActionMiddleware
 from moviepy import VideoFileClip
 from pydub import AudioSegment
@@ -35,7 +35,7 @@ async def start(message: Message):
 
 @router.message(F.text == type_your)
 async def classic(message: Message):
-    await message.answer("Вы можете прислать следующие варианты:\n-Голосовые сообщения\n-Кружочек\n-Аудио файл\n-Видео файл")
+    await message.answer("Вы можете прислать следующие варианты:\n-Голосовые сообщения\n-Кружочек\n-Аудио файл\n-Видео файл", reply_markup=ReplyKeyboardRemove())
 
 
 @router.message(F.text == type_books)
@@ -60,15 +60,18 @@ async def biology(message: Message):
 
 @router.message(F.text == "1 параграф" or F.text == "2 параграф")
 async def paragraph(message: Message):
+    wait = await message.answer('Загружаю параграф...', reply_markup=ReplyKeyboardRemove())
     user_id = str(message.from_user.id)
     if str(message.text) == "1 параграф":
         with open("docs/books/biology/paragraph_one.txt", "r") as file:
             result = file.read()
+            await wait.delete()
             task = asyncio.create_task(print_info(message, user_id, result, True))
             await task
     elif str(message.text) == "2 параграф":
         with open("docs/books/biology/paragraph_two.txt", "r") as file:
             result = file.read()
+            await wait.delete()
             task = asyncio.create_task(print_info(message, user_id, result, True))
             await task
 
