@@ -2,6 +2,7 @@ import asyncio
 import os
 import subprocess
 
+from PyPDF2 import PdfReader
 from aiogram import F, Router, types, Bot
 from aiogram.filters import CommandStart
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile, InputFile, ReplyKeyboardRemove
@@ -169,6 +170,40 @@ async def handler_video_note(message: types.Message):
 
     os.remove(f"{user_id}_{file_id}.mp4")
     os.remove(f"{user_id}_{file_id}.mp3")
+
+
+def extract_text_from_pdf(file_path):
+    with open(file_path, 'rb') as file:
+        reader = PdfReader(file)
+        text = ''
+        for page in reader.pages:
+            text += page.extract_text()
+        return text
+
+
+@router.message(lambda message: message.document is not None)
+async def handle_pdf(message: types.Message):
+    if message.document.mime_type == 'application/pdf':
+        file_id = message.document.file_id
+        file = await bot.get_file(file_id)
+        file_path = file.file_path
+        downloaded_file = await bot.download_file(file_path)
+
+        temp_file = f"temp_{file_id}.pdf"
+        with open(temp_file, 'wb') as f:
+            f.write(downloaded_file.read())
+
+        text = extract_text_from_pdf(temp_file)
+
+        os.remove(temp_file)
+
+        if text:
+            task = asyncio.create_task(print_info(message, str(message.from_user.id), text, True))
+            await task
+        else:
+            await message.reply("Не удалось извлечь текст из PDF.")
+    else:
+        await message.reply("Пожалуйста, отправьте PDF-файл.")
 
 
 async def print_info(message: types.Message, user_id: str, file_id: str, book: bool):
