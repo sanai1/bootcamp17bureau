@@ -1,3 +1,4 @@
+import asyncio
 import os
 import subprocess
 
@@ -87,27 +88,33 @@ async def handler_voice(message: types.Message):
     file = await bot.get_file(file_id)
     file_path = file.file_path
     user_id = str(message.from_user.id)
-    await bot.download_file(file_path, f"docs/audio/{user_id}.ogg")
 
-    await print_info(message, user_id)
+    file_name = f"docs/audio/{user_id}_{file_id}.ogg"
+    await bot.download_file(file_path, file_name)
+
+    task = asyncio.create_task(print_info(message, user_id, file_id))
+
+    await task
 
 
-@router.message(lambda message: message.audio is not None)
-async def handler_audio(message: types.Message):
-    user_id = str(message.from_user.id)
-    audio_ = message.audio
-    file_id = audio_.file_id
+async def print_info(message: types.Message, user_id: str, file_id: str):
+    try:
+        # Распознаем речь
+        text = await recognize_speech(f"{user_id}_{file_id}")
+        if not text:
+            await message.answer("Не удалось распознать речь.")
+            return
 
-    file = await bot.get_file(file_id)
-    file_path = file.file_path
-    await bot.download_file(file_path, f"{user_id}.mp3")
+        # Получаем конспект
+        text_sum = await text_to_sum(text)
+        await message.answer(f"Конспект по теме:\n\n{text_sum}")
+        test = await get_test(text)
+        await message.answer(f"Тест по теме:\n\n{test}")
+        markdown = await txt_markdown(text)
+        await message.answer(f"markdown:\n\n{markdown}")
 
-    audio_segment = AudioSegment.from_mp3(f"{user_id}.mp3")
-    audio_segment.export(f"docs/audio/{user_id}.ogg", format="ogg")
-
-    await print_info(message, user_id)
-
-    os.remove(f"{user_id}.mp3")
+    except Exception as e:
+        await message.answer(f"Ошибка обработки: {str(e)}")
 
 
 @router.message(lambda message: message.video_note is not None)
