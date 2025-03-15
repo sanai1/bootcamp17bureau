@@ -36,7 +36,7 @@ async def start(message: Message):
 
 @router.message(F.text == type_your)
 async def classic(message: Message):
-    await message.answer("Вы можете прислать для обратки:\n- Голосовые сообщения\n- Телеграм-кружочек\n- Аудио файл\n- Видео файл", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Вы можете прислать для обратки:\n- Голосовые сообщения\n- Телеграм-кружочек\n- Аудио файл\n- Видео файл\n- рdf-файл по теме / учебник", reply_markup=ReplyKeyboardRemove())
 
 
 @router.message(F.text == type_books)
