@@ -87,6 +87,7 @@ async def biology(message: Message):
 @router.message(F.text == "Другие предметы (в скором времени)")
 async def biology(message: Message):
     await message.answer("Тут пока что пусто, загляните в другие вкладки, там много интересного!", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Для перезапуска нажмите: /start")
 
 
 @router.message(F.text == "1 параграф")
@@ -228,8 +229,10 @@ async def handle_pdf(message: types.Message, state: FSMContext) -> None:
             await task
         else:
             await message.reply("Не удалось извлечь текст из PDF.")
+            await message.answer("Для перезапуска нажмите: /start")
     else:
         await message.reply("Пожалуйста, отправьте PDF-файл.")
+        await message.answer("Для перезапуска нажмите: /start")
 
 
 async def print_info(message: types.Message, user_id: str, file_id: str, book: bool, state: FSMContext):
@@ -252,7 +255,6 @@ async def print_info(message: types.Message, user_id: str, file_id: str, book: b
 
         try:
             text_sum = await translate(await text_to_sum(text), language_)
-
             await message.answer(f"План лекции по теме:\n\n{text_sum}")
         except Exception as e:
             await message.answer("Это интересная тема, но у меня не удалось создать план. Повтори попозже, пожалуйста.")
@@ -301,3 +303,4 @@ async def print_info(message: types.Message, user_id: str, file_id: str, book: b
             await message.answer(markdown)
     except Exception as e:
         await message.answer(f"Ой, что-то явно пошло не так. Попробуйте ещё раз, пожалуйста.\n{str(e)}")
+    await message.answer("Для перезапуска нажмите: /start")
