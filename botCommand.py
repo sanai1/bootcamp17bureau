@@ -20,7 +20,7 @@ router = Router()
 bot = Bot(token=secretsData.token_bot)
 router.message.middleware(ChatActionMiddleware())
 
-type_your = "Свои материалы"
+type_your = "На основе моих идей / записей"
 type_books = "Наши материалы"
 
 @router.message(CommandStart())
@@ -29,14 +29,14 @@ async def start(message: Message):
         [KeyboardButton(text=type_your), KeyboardButton(text=type_books)]
     ],
         resize_keyboard = True,
-        input_field_placeholder = "Выберите вариант данных?"
+        input_field_placeholder = "Выберите, на основе чего вы хотите получить базу для вашей лекции:"
     )
-    await message.answer("Добро пожаловать", reply_markup=keyboard)
+    await message.answer("Добро пожаловать\n\nЯ - помощник в создании плана для лекции, помогу вам составить:\n- План лекции по пунктам\n- тесты по данной теме\n- Презентацию для лекции по данной теме\n\nДля основы для формирования плана лекции ты можешь использовать:\n- Голосовое сообщение\n- Аудио-файл (формат mp3)\n- Запись вашей/чужой лекции, структуру которой вы хотите повторить\n- Использовать официальные учебники по предмету", reply_markup=keyboard)
 
 
 @router.message(F.text == type_your)
 async def classic(message: Message):
-    await message.answer("Вы можете прислать следующие варианты:\n-Голосовые сообщения\n-Кружочек\n-Аудио файл\n-Видео файл", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Вы можете прислать для обратки:\n- Голосовые сообщения\n- Телеграм-кружочек\n- Аудио файл\n- Видео файл", reply_markup=ReplyKeyboardRemove())
 
 
 @router.message(F.text == type_books)
@@ -60,7 +60,7 @@ async def biology(message: Message):
 
 @router.message(F.text == "Иные предметы (в скором времени)")
 async def biology(message: Message):
-    await message.answer("Тут пока что пусто.", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Тут пока что пусто, загляните в другие вкладки, там много интересного!", reply_markup=ReplyKeyboardRemove())
 
 
 @router.message(F.text == "1 параграф")
@@ -213,7 +213,7 @@ async def print_info(message: types.Message, user_id: str, file_id: str, book: b
             text = await recognize_speech(f"{user_id}_{file_id}")
             if not text:
                 await wait.delete()
-                await message.answer("Не удалось распознать речь. Повтори попозже, пожалуйста")
+                await message.answer("Не удалось распознать речь. Вы можете попробовать ещё раз, а я попробую вам помочь")
                 return
 
             await wait.delete()
@@ -224,9 +224,9 @@ async def print_info(message: types.Message, user_id: str, file_id: str, book: b
 
         try:
             text_sum = await text_to_sum(text)
-            await message.answer(f"Конспект по теме:\n\n{text_sum}")
+            await message.answer(f"План лекции по теме:\n\n{text_sum}")
         except Exception as e:
-            await message.answer("Конспект не вышло получить. Повтори попозже, пожалуйста.")
+            await message.answer("Это интересная тема, но у меня не удалось создать план. Повтори попозже, пожалуйста.")
 
         await wait.delete()
 
@@ -236,7 +236,7 @@ async def print_info(message: types.Message, user_id: str, file_id: str, book: b
             test = await get_test(text)
             await message.answer(f"Тест по теме:\n\n{test}")
         except Exception as e:
-            await message.answer("Тесты не вышло получить. Повтори попозже, пожалуйста.")
+            await message.answer("Извините, у меня не получилось придумать тесты. Повтори попозже, пожалуйста.")
 
         await wait.delete()
 
@@ -268,7 +268,7 @@ async def print_info(message: types.Message, user_id: str, file_id: str, book: b
         except subprocess.CalledProcessError as e:
             await wait.delete()
             await message.answer(
-                f"Формат markdown для создания презентации:\nСервисы для конвертации MD в PFD\nhttps://apitemplate.io/pdf-tools/convert-markdown-to-pdf/\n\nhttps://www.markdowntopdf.com/")
+                f"У меня не получилось создать файл pdf, вы можете попробовать ещё раз или использовать конвертеры.\n\nФормат markdown для создания презентации:\nСервисы для конвертации MD в PFD\nhttps://apitemplate.io/pdf-tools/convert-markdown-to-pdf/\n\nhttps://www.markdowntopdf.com/")
             await message.answer(markdown)
     except Exception as e:
-        await message.answer(f"Ой, что-то явно пошло не так. Попробуй ещё разочек.\n{str(e)}")
+        await message.answer(f"Ой, что-то явно пошло не так. Попробуйте ещё раз, пожалуйста.\n{str(e)}")
