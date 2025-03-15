@@ -150,11 +150,17 @@ async def print_info(message: types.Message, user_id: str, file_id: str):
             await message.answer("Не удалось распознать речь.")
             return
 
-        text_sum = await text_to_sum(text)
-        await message.answer(f"Конспект по теме:\n\n{text_sum}")
+        try:
+            text_sum = await text_to_sum(text)
+            await message.answer(f"Конспект по теме:\n\n{text_sum}")
+        except Exception as e:
+            await message.answer("Конспект не вышло получить. Сори ((")
 
-        test = await get_test(text)
-        await message.answer(f"Тест по теме:\n\n{test}")
+        try:
+            test = await get_test(text)
+            await message.answer(f"Тест по теме:\n\n{test}")
+        except Exception as e:
+            await message.answer("Тесты не вышло получить. Сори ((")
 
         markdown = await txt_markdown(text)
         save_path_markdown = os.path.join("docs/markdown", f"{user_id}_{file_id}.txt")
