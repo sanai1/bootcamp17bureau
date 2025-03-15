@@ -36,7 +36,6 @@ async def text_to_sum(user_prompt: str) -> str:
     headers = {"Authorization": f"Api-Key {api_key}"}
 
     while True:
-        print(operation_id)
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
             return f"Ошибка получения ответа: {response.text}"
