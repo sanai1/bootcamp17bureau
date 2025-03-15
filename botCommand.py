@@ -57,6 +57,10 @@ async def biology(message: Message):
     )
     await message.answer("Выберите параграф", reply_markup=keyboard)
 
+@router.message(F.text == "Иные предметы (в скором времени)")
+async def biology(message: Message):
+    await message.answer("Тут пока что пусто.", reply_markup=ReplyKeyboardRemove())
+
 
 @router.message(F.text == "1 параграф" or F.text == "2 параграф")
 async def paragraph(message: Message):
