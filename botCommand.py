@@ -73,7 +73,9 @@ async def handler_video(message: types.Message):
     audio_segment = AudioSegment.from_mp3(f"{user_id}_{file_id}.mp3")
     audio_segment.export(f"docs/audio/{user_id}_{file_id}.ogg", format="ogg")
 
-    await print_info(message, user_id, file_id)
+    task = asyncio.create_task(print_info(message, user_id, file_id))
+
+    await task
 
     os.remove(f"{user_id}_{file_id}.mp4")
     os.remove(f"{user_id}_{file_id}.mp3")
@@ -109,7 +111,9 @@ async def handler_audio(message: types.Message):
     audio_segment = AudioSegment.from_mp3(f"{user_id}_{file_id}.mp3")
     audio_segment.export(f"docs/audio/{user_id}_{file_id}.ogg", format="ogg")
 
-    await print_info(message, user_id, file_id)
+    task = asyncio.create_task(print_info(message, user_id, file_id))
+
+    await task
 
     os.remove(f"{user_id}_{file_id}.mp3")
 
@@ -131,7 +135,9 @@ async def handler_video_note(message: types.Message):
     audio_segment = AudioSegment.from_mp3(f"{user_id}_{file_id}.mp3")
     audio_segment.export(f"docs/audio/{user_id}_{file_id}.ogg", format="ogg")
 
-    await print_info(message, user_id, file_id)
+    task = asyncio.create_task(print_info(message, user_id, file_id))
+
+    await task
 
     os.remove(f"{user_id}_{file_id}.mp4")
     os.remove(f"{user_id}_{file_id}.mp3")
