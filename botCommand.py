@@ -4,7 +4,7 @@ import subprocess
 
 from aiogram import F, Router, types, Bot
 from aiogram.filters import CommandStart
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile, InputFile
 from aiogram.utils.chat_action import ChatActionMiddleware
 from moviepy import VideoFileClip
 from pydub import AudioSegment
@@ -160,24 +160,38 @@ async def handler_video_note(message: types.Message):
     os.remove(f"{user_id}_{file_id}.mp3")
 
 
-async def print_info(message: types.Message, user_id: str, file_id: str, book: bool):
+async def print_info(message: types.Message, user_id: str, file_id: str):
+    wait = await message.answer('Распознаю речь...')
     try:
         text = await recognize_speech(f"{user_id}_{file_id}")
         if not text:
-            await message.answer("Не удалось распознать речь.")
+            await wait.delete()
+            await message.answer("Не удалось распознать речь. Повтори попозже, пожалуйста")
             return
+
+        await wait.delete()
+
+        wait = await message.answer('Создаю план лекции...')
 
         try:
             text_sum = await text_to_sum(text)
             await message.answer(f"Конспект по теме:\n\n{text_sum}")
         except Exception as e:
-            await message.answer("Конспект не вышло получить. Сори ((")
+            await message.answer("Конспект не вышло получить. Повтори попозже, пожалуйста.")
+
+        await wait.delete()
+
+        wait = await message.answer('Придумываю вопросы по теме... ')
 
         try:
             test = await get_test(text)
             await message.answer(f"Тест по теме:\n\n{test}")
         except Exception as e:
-            await message.answer("Тесты не вышло получить. Сори ((")
+            await message.answer("Тесты не вышло получить. Повтори попозже, пожалуйста.")
+
+        await wait.delete()
+
+        wait = await message.answer('Верстую презентацию по теме...')
 
         markdown = await txt_markdown(text)
         save_path_markdown = os.path.join("docs/markdown", f"{user_id}_{file_id}.txt")
@@ -204,4 +218,4 @@ async def print_info(message: types.Message, user_id: str, file_id: str, book: b
                 f"Формат markdown для создания презентации:\nСервисы для конвертации MD в PFD\nhttps://apitemplate.io/pdf-tools/convert-markdown-to-pdf/\n\nhttps://www.markdowntopdf.com/")
             await message.answer(markdown)
     except Exception as e:
-        await message.answer(f"Ошибка обработки: {str(e)}")
+        await message.answer(f"Ой, что-то явно пошло не так. Попробуй ещё разочек.\n{str(e)}")
